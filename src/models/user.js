@@ -12,18 +12,6 @@ const UserSchema = new mongoose.Schema({
   other: mongoose.Schema.Types.Mixed,
 });
 
-
-// Create db index
-// UserSchema.index({
-//   "name": "text",
-//   "description": "text",
-//   "price": "text",
-//   "brand": "text",
-//   "categories": "text",
-//   "sku": "text",
-//   "color.name": 1,
-// });
-
 UserSchema.plugin(diffHistory.plugin);
 
 const User = mongoose.model('User', UserSchema);
