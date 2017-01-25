@@ -1,0 +1,30 @@
+{
+  "name": "rio-auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "backpack build && node ./build/main.js --ISSUER=Metheora --AUDIENCE=Demillus",
+    "dev": "backpack dev",
+    "build": "backpack build",
+    "postinstall": "backpack build"
+  },
+  "author": "Victor Hugo Marques",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^1.0.2",
+    "body-parser": "^1.16.0",
+    "express": "^4.14.0",
+    "jsonwebtoken": "^7.2.1",
+    "method-override": "^2.3.7",
+    "minimist": "^1.2.0",
+    "moment": "^2.17.1",
+    "mongoose": "^4.4.8",
+    "mongoose-diff-history": "^1.1.2",
+    "uuid": "^3.0.1"
+  },
+  "devDependencies": {
+    "babel-preset-stage-0": "^6.16.0",
+    "backpack-core": "0.0.7"
+  }
+}
