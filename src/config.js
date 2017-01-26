@@ -1,5 +1,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 
+export const PORT = argv.PORT || 3010;;
 export const MONGO_URI = argv.MONGO_URI || 'mongodb://localhost:27017/rio-auth';
 export const AUDIENCE = argv.AUDIENCE || 'myapp';
 export const ISSUER = argv.ISSUER || 'myapp';

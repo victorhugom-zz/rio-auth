@@ -5,12 +5,10 @@ import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
-const argv = require('minimist')(process.argv.slice(2));
-
 import User from './models/user';
 
 import {
-  MONGO_URI, AUDIENCE, ISSUER, EXPIRE_TIME, APP_SECRET
+  MONGO_URI, AUDIENCE, ISSUER, EXPIRE_TIME, APP_SECRET, PORT
 } from './config';
 
 // Set up mongo connection
@@ -36,18 +34,18 @@ app.use(allowCrossDomain);
 app.use(bodyParser.json());
 app.use(methodOverride());
 
-const port = argv.PORT || 3010;
-
 function createJwt(user) {
   const {email, password, roles} = user;
 
-  return jwt.sign({
+  let token = jwt.sign({
     email,
     roles,
     iss: ISSUER,
     aud: AUDIENCE,
     exp: Math.floor(Date.now() / 1000) + EXPIRE_TIME
   }, user.password);
+
+  return { token };
 }
 
 /**
@@ -65,7 +63,7 @@ app.post('/api/v1/login', (req, res, next) => {
 
     // if some error occours send the base error message
     if (err) {
-      next("invalid user or password");
+      res.status(401).send("invalid user or password");
     }
 
     // if there is not user create one
@@ -73,15 +71,15 @@ app.post('/api/v1/login', (req, res, next) => {
 
       bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
         User.create({ email: req.body.email, password: hash, roles: ["user"] }, (err, newUser) => {
-          return next(createJwt(newUser));
+          res.send(createJwt(newUser));
         })
       });
     }
     // if the user was found validate the password and create the jwt
     else {
       //check password
-      bcrypt.compare(req.body.password, dbUser.password, (err, res) => {
-        return res ? next(createJwt(dbUser)) : next("invalid user or password");
+      bcrypt.compare(req.body.password, dbUser.password, (err, result) => {
+        result ? res.send(createJwt(dbUser)) : res.status(401).send("invalid user or password");
       });
     }
   });
@@ -102,10 +100,10 @@ app.post('/api/v1/validate', (req, res, next) => {
   User.findOne({ "email": decodedToken.email }, (err, dbUser) => {
 
     if (!dbUser)
-      return "invalid token";
+      return res.status(401).send("invalid token");
 
     jwt.verify(token, dbUser.password, (err, decoded) => {
-      return err ? next(err.message) : next(true);
+      err ? res.status(500).send(err.message) : res.send(true);
     });
   });
 })
@@ -123,16 +121,16 @@ app.post("/api/v1/grantrole", (req, res, next) => {
 
   let {email, role, secret} = req.body;
 
-  if (secret != App_SECRET)
-    return next("not allowed");
+  if (secret != APP_SECRET)
+    return res.status(401).send("not allowed");
 
   User.findOne({ "email": email }, (err, dbUser) => {
     if (!dbUser)
-      return "invalid token";
+      return res.status(401).send("invalid token");
 
     dbUser.roles.push(role);
-    User.update({ _id: dbUser._id }, dbUser, (err, res) => {
-      return err ? next("error") : next(true);
+    User.update({ _id: dbUser._id }, dbUser, (err, updatedUser) => {
+      err ? res.status(500).send("error") : res.send(true);
     })
   });
 });
@@ -150,20 +148,20 @@ app.post("/api/v1/revokerole", (req, res, next) => {
 
   let {email, role, secret} = req.body;
 
-  if (secret != App_SECRET)
-    return next("not allowed");
+  if (secret != APP_SECRET)
+    return res.status(401).send("not allowed");
 
   User.findOne({ "email": email }, (err, dbUser) => {
     if (!dbUser)
-      return "invalid token";
+      return res.status(401).send("invalid token");
 
     dbUser.roles = dbUser.roles.filter(x => x != role);
-    User.update({ _id: dbUser._id }, dbUser, (err, res) => {
-      return err ? next("error") : next(true);
+    User.update({ _id: dbUser._id }, dbUser, (err, updatedUser) => {
+      err ? res.status(500).send("error") : res.send(true);
     })
   });
 });
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
 });
