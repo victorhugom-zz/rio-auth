@@ -10,7 +10,7 @@ services:
     links:
       - mongo
     command:
-      --MONGO_URI=mongodb://0.0.0.0:27017/rio-auth
+      --MONGO_URI=mongodb://mongo:27017/rio-auth
       --ISSUER=me
   mongo:
     image: mongo
