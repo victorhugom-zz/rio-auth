@@ -10,6 +10,7 @@ services:
     links:
       - mongo
     command:
+      --MONGO_URI=mongodb://0.0.0.0:27017/rio-auth
       --ISSUER=me
   mongo:
     image: mongo
@@ -17,4 +18,4 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - //c/data/db2:/data/db
+      - /data/db:/data/db
