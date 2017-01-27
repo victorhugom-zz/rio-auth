@@ -12,7 +12,10 @@ import {
 } from './config';
 
 // Set up mongo connection
-mongoose.connect(process.env.MONGO_URI || MONGO_URI);
+mongoose.connect(MONGO_URI, err=>{
+  console.error(err);
+});
+
 var db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'connection error:'));
