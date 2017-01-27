@@ -6,5 +6,5 @@ WORKDIR /app
 RUN npm install
 RUN npm build
 
-EXPOSE 3000
+EXPOSE 3010
 ENTRYPOINT npm start
